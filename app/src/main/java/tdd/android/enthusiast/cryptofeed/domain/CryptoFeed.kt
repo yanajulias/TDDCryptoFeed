@@ -1,4 +1,4 @@
-package tdd.android.enthusiast.cryptofeed
+package tdd.android.enthusiast.cryptofeed.domain
 
 data class CryptoFeed (
     val coinInfo : CoinInfo,
