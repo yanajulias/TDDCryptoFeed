@@ -1,6 +1,4 @@
-package tdd.android.enthusiast.cryptofeed
-
-import tdd.android.enthusiast.cryptofeed.domain.CryptoFeed
+package tdd.android.enthusiast.cryptofeed.domain
 
 sealed class CryptoFeedResult {
     data class Success(val cryptoFeed: List<CryptoFeed>) : CryptoFeedResult()
