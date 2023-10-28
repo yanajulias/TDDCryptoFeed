@@ -6,22 +6,33 @@ import org.junit.Test
 
 class LoadCryptoFeedRemoteUseCase() {
     fun load() {
-        HttpClient.instance.getCount = 1
+        HttpClient.instance.get()
     }
 }
 
-class HttpClient private constructor() {
+open class HttpClient {
     companion object {
-        val instance = HttpClient()
+        var instance = HttpClient()
     }
 
+    open fun get(){
+
+    }
+}
+
+class HttpClientSpy : HttpClient() {
     var getCount = 0
+
+    override fun get() {
+        getCount += 1
+    }
 }
 
 class LoadCryptoFeedRemoteUseCaseTest() {
     @Test
     fun testInitDoesNotLoad() {
-        val client = HttpClient.instance
+        val client = HttpClientSpy()
+        HttpClient.instance = client
         LoadCryptoFeedRemoteUseCase()
 
         assertTrue(client.getCount == 0) // memastikan kalau tidak di load sama sekali
@@ -30,7 +41,8 @@ class LoadCryptoFeedRemoteUseCaseTest() {
     @Test
     fun testLoadRequestData() {
         //Given
-        val client = HttpClient.instance
+        val client = HttpClientSpy()
+        HttpClient.instance = client
         val sut = LoadCryptoFeedRemoteUseCase()
 
         // When (action)
