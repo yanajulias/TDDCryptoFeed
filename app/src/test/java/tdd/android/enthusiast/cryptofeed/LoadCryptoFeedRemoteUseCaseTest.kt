@@ -3,18 +3,8 @@ package tdd.android.enthusiast.cryptofeed
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
-
-class LoadCryptoFeedRemoteUseCase constructor(
-    private val client: HttpClient
-) {
-    fun load() {
-        client.get()
-    }
-}
-
-interface HttpClient {
-    fun get()
-}
+import tdd.android.enthusiast.cryptofeed.api.HttpClient
+import tdd.android.enthusiast.cryptofeed.api.LoadCryptoFeedRemoteUseCase
 
 class LoadCryptoFeedRemoteUseCaseTest() {
     @Test
