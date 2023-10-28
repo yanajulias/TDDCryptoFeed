@@ -8,14 +8,14 @@ import tdd.android.enthusiast.cryptofeed.api.LoadCryptoFeedRemoteUseCase
 
 class LoadCryptoFeedRemoteUseCaseTest() {
     @Test
-    fun testInitDoesNotLoad() {
+    fun testInitDoesNotRequestData() {
         val (_, client) = makeSut()
 
         assertTrue(client.getCount == 0) // memastikan kalau tidak di load sama sekali
     }
 
     @Test
-    fun testLoadRequestData() {
+    fun testLoadRequestsData() {
         //Given
         val (sut, client) = makeSut()
 
