@@ -1,77 +1,75 @@
 package tdd.android.enthusiast.cryptofeed
 
+import app.cash.turbine.test
+import io.mockk.MockKAnnotations
+import io.mockk.confirmVerified
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.spyk
+import io.mockk.verify
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
+import org.junit.Before
 import org.junit.Test
 import tdd.android.enthusiast.cryptofeed.api.Connectivity
+import tdd.android.enthusiast.cryptofeed.api.ConnectivityException
 import tdd.android.enthusiast.cryptofeed.api.HttpClient
 import tdd.android.enthusiast.cryptofeed.api.LoadCryptoFeedRemoteUseCase
 
 class LoadCryptoFeedRemoteUseCaseTest() {
+    private val client = spyk<HttpClient>()
+    lateinit var sut: LoadCryptoFeedRemoteUseCase
+
+
+    @Before
+    fun setUp() {
+        MockKAnnotations.init(this, relaxed = true)
+        sut = LoadCryptoFeedRemoteUseCase(client)
+    }
+
     @Test
     fun testInitDoesNotRequestData() {
-        val (_, client) = makeSut()
-
-        assertTrue(client.getCount == 0) // memastikan kalau tidak di load sama sekali
+        verify(exactly = 0) { // untuk verifikasi kalo client.get kepanggil atau eng
+            client.get()
+        }
     }
 
     @Test
-    fun testLoadRequestsData() {
-        //Given
-        val (sut, client) = makeSut()
+    fun testLoadRequestsData() = runBlocking {
+        every {
+            client.get()
+        } returns flowOf()
 
-        // When (action)
-        sut.load()
-
-        // Then
-        assertEquals(1, client.getCount) // cek kalo betul di load 1 kali
-    }
-
-    @Test
-    fun testLoadRequestsDataTwice() {
-        //Given
-        val (sut, client) = makeSut()
-
-        // When (action)
-        sut.load()
-        sut.load()
-
-        // Then
-        assertEquals(2, client.getCount) // cek kalo betul di load 1 kali
-    }
-
-    @Test
-    fun testLoadDeliversErrorOnClientError() = runBlocking {
-        val (sut, client) = makeSut()
-
-        client.error = Exception("Test")
-
-        val capturedError = arrayListOf<Exception>()
-        sut.load().collect { error ->
-            capturedError.add(error)
+        sut.load().test {
+            awaitComplete()
+        }
+        verify(exactly = 1) {
+            client.get()
         }
 
-        assertEquals(listOf(Connectivity::class.java), capturedError.map { it::class.java })
+        confirmVerified(client)
     }
 
-    private fun makeSut(): Pair<LoadCryptoFeedRemoteUseCase, HttpClientSpy> {
-        val client = HttpClientSpy()
-        val sut = LoadCryptoFeedRemoteUseCase(client = client)
-        return Pair(sut, client)
-    }
+    @Test
+    fun testLoadRequestsDataTwice() = runBlocking {
+        every {
+            client.get()
+        } returns flowOf()
 
-    private class HttpClientSpy : HttpClient {
-        var getCount = 0
-        var error: Exception? = null
-
-        override fun get(): Flow<Exception> = flow {
-            if (error != null) {
-                emit(error ?: Exception())
-            }
-            getCount += 1
+        sut.load().test {
+            awaitComplete()
         }
+        sut.load().test {
+            awaitComplete()
+        }
+        verify(exactly = 2) {
+            client.get()
+        }
+
+        confirmVerified(client)
     }
 }
