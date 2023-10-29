@@ -6,12 +6,12 @@ plugins {
 
 android {
     namespace = "tdd.android.enthusiast.cryptofeed"
-    compileSdk = 33
+    compileSdk = 34
 
     defaultConfig {
         applicationId = "tdd.android.enthusiast.cryptofeed"
         minSdk = 24
-        targetSdk = 33
+        targetSdk = 34
         versionCode = 1
         versionName = "1.0"
 
@@ -61,6 +61,7 @@ dependencies {
     implementation(libs.ui.tooling.preview)
     implementation(libs.material3)
     testImplementation(libs.junit)
+    testImplementation(libs.turbine)
     androidTestImplementation(libs.androidx.test.ext.junit)
     androidTestImplementation(libs.espresso.core)
     androidTestImplementation(platform(libs.compose.bom))
