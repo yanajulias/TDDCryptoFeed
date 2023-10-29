@@ -4,15 +4,11 @@ import app.cash.turbine.test
 import io.mockk.MockKAnnotations
 import io.mockk.confirmVerified
 import io.mockk.every
-import io.mockk.mockk
 import io.mockk.spyk
 import io.mockk.verify
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import tdd.android.enthusiast.cryptofeed.api.Connectivity
@@ -70,6 +66,21 @@ class LoadCryptoFeedRemoteUseCaseTest() {
             client.get()
         }
 
+        confirmVerified(client)
+    }
+
+    @Test
+    fun testLoadDeliversConnectivityErrorOnClientError() = runBlocking {
+        every {
+            client.get()
+        } returns flowOf(ConnectivityException())
+
+        sut.load().test {
+            assertEquals(Connectivity::class.java, awaitItem()::class.java)
+            awaitComplete()
+        }
+
+        verify(exactly = 1) { client.get() }
         confirmVerified(client)
     }
 }
