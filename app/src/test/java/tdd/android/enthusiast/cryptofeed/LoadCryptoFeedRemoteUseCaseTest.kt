@@ -14,6 +14,8 @@ import org.junit.Test
 import tdd.android.enthusiast.cryptofeed.api.Connectivity
 import tdd.android.enthusiast.cryptofeed.api.ConnectivityException
 import tdd.android.enthusiast.cryptofeed.api.HttpClient
+import tdd.android.enthusiast.cryptofeed.api.InvalidData
+import tdd.android.enthusiast.cryptofeed.api.InvalidDataException
 import tdd.android.enthusiast.cryptofeed.api.LoadCryptoFeedRemoteUseCase
 
 class LoadCryptoFeedRemoteUseCaseTest() {
@@ -81,6 +83,21 @@ class LoadCryptoFeedRemoteUseCaseTest() {
         }
 
         verify(exactly = 1) { client.get() }
+        confirmVerified(client)
+    }
+
+    @Test
+    fun testLoadDeliversInvalidDataError() = runBlocking {
+        every {
+            client.get()
+        } returns flowOf(InvalidDataException())
+
+        sut.load().test {
+            assertEquals(InvalidData::class.java, awaitItem()::class.java)
+            awaitComplete()
+        }
+
+        verify (exactly = 1){ client.get() }
         confirmVerified(client)
     }
 }
