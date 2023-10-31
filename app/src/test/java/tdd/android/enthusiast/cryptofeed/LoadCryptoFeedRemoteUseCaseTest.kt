@@ -16,6 +16,8 @@ import tdd.android.enthusiast.cryptofeed.api.BadRequestException
 import tdd.android.enthusiast.cryptofeed.api.Connectivity
 import tdd.android.enthusiast.cryptofeed.api.ConnectivityException
 import tdd.android.enthusiast.cryptofeed.api.HttpClient
+import tdd.android.enthusiast.cryptofeed.api.InternalServerError
+import tdd.android.enthusiast.cryptofeed.api.InternalServerErrorException
 import tdd.android.enthusiast.cryptofeed.api.InvalidData
 import tdd.android.enthusiast.cryptofeed.api.InvalidDataException
 import tdd.android.enthusiast.cryptofeed.api.LoadCryptoFeedRemoteUseCase
@@ -104,6 +106,18 @@ class LoadCryptoFeedRemoteUseCaseTest() {
             sut = sut,
             receivedHttpClientResult = BadRequestException(),
             expectedResult = BadRequest(),
+            exactly = 1,
+            confirmVerified = client
+        )
+    }
+
+    @Test
+    fun testLoadDeliversInternalServerError() = runBlocking {
+        expect(
+            client = client,
+            sut = sut,
+            receivedHttpClientResult = InternalServerErrorException(),
+            expectedResult = InternalServerError(),
             exactly = 1,
             confirmVerified = client
         )

@@ -29,6 +29,11 @@ class LoadCryptoFeedRemoteUseCase constructor(
                 is BadRequestException -> {
                     emit(BadRequest())
                 }
+
+                is InternalServerErrorException -> {
+                    emit(InternalServerError())
+                }
+
             }
         }
     }
@@ -37,3 +42,4 @@ class LoadCryptoFeedRemoteUseCase constructor(
 class Connectivity : Exception()
 class InvalidData : Exception()
 class BadRequest : Exception()
+class InternalServerError : Exception()
