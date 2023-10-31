@@ -19,8 +19,6 @@ import tdd.android.enthusiast.cryptofeed.api.HttpClient
 import tdd.android.enthusiast.cryptofeed.api.InvalidData
 import tdd.android.enthusiast.cryptofeed.api.InvalidDataException
 import tdd.android.enthusiast.cryptofeed.api.LoadCryptoFeedRemoteUseCase
-import tdd.android.enthusiast.cryptofeed.api.ServerError
-import tdd.android.enthusiast.cryptofeed.api.ServerErrorException
 
 class LoadCryptoFeedRemoteUseCaseTest() {
     private val client = spyk<HttpClient>()
@@ -76,7 +74,7 @@ class LoadCryptoFeedRemoteUseCaseTest() {
     }
 
     @Test
-    fun testLoadDeliversConnectivityErrorOnClientError() = runBlocking {
+    fun testLoadDeliversConnectivityErrorOnClientError() {
         expect(
             client = client,
             sut = sut,
@@ -101,35 +99,17 @@ class LoadCryptoFeedRemoteUseCaseTest() {
 
     @Test
     fun testLoadDeliversBadRequestError() = runBlocking {
-        every {
-            client.get()
-        } returns flowOf(BadRequestException())
-
-        sut.load().test {
-            assertEquals(BadRequest::class.java, awaitItem()::class.java)
-            awaitComplete()
-        }
-
-        verify(exactly = 1) { client.get() }
-        confirmVerified(client)
+        expect(
+            client = client,
+            sut = sut,
+            receivedHttpClientResult = BadRequestException(),
+            expectedResult = BadRequest(),
+            exactly = 1,
+            confirmVerified = client
+        )
     }
 
-    @Test
-    fun testLoadDeliversServerError() = runBlocking {
-        every {
-            client.get()
-        } returns flowOf(ServerErrorException())
-
-        sut.load().test {
-            assertEquals(ServerError::class.java, awaitItem()::class.java)
-            awaitComplete()
-        }
-
-        verify(exactly = 1) { client.get() }
-        confirmVerified(client)
-    }
-
-    fun expect(
+    private fun expect(
         client: HttpClient,
         sut: LoadCryptoFeedRemoteUseCase,
         receivedHttpClientResult: Exception,
@@ -142,7 +122,7 @@ class LoadCryptoFeedRemoteUseCaseTest() {
         } returns flowOf(receivedHttpClientResult)
 
         sut.load().test {
-            assertEquals(expectedResult, awaitItem()::class.java)
+            assertEquals(expectedResult::class.java, awaitItem()::class.java)
             awaitComplete()
         }
 
