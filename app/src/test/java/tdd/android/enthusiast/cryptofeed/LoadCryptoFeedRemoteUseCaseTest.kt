@@ -11,12 +11,16 @@ import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
+import tdd.android.enthusiast.cryptofeed.api.BadRequest
+import tdd.android.enthusiast.cryptofeed.api.BadRequestException
 import tdd.android.enthusiast.cryptofeed.api.Connectivity
 import tdd.android.enthusiast.cryptofeed.api.ConnectivityException
 import tdd.android.enthusiast.cryptofeed.api.HttpClient
 import tdd.android.enthusiast.cryptofeed.api.InvalidData
 import tdd.android.enthusiast.cryptofeed.api.InvalidDataException
 import tdd.android.enthusiast.cryptofeed.api.LoadCryptoFeedRemoteUseCase
+import tdd.android.enthusiast.cryptofeed.api.ServerError
+import tdd.android.enthusiast.cryptofeed.api.ServerErrorException
 
 class LoadCryptoFeedRemoteUseCaseTest() {
     private val client = spyk<HttpClient>()
@@ -73,12 +77,36 @@ class LoadCryptoFeedRemoteUseCaseTest() {
 
     @Test
     fun testLoadDeliversConnectivityErrorOnClientError() = runBlocking {
+        expect(
+            client = client,
+            sut = sut,
+            receivedHttpClientResult = ConnectivityException(),
+            expectedResult = Connectivity(),
+            exactly = 1,
+            confirmVerified = client
+        )
+    }
+
+    @Test
+    fun testLoadDeliversInvalidDataError() = runBlocking {
+        expect(
+            client = client,
+            sut = sut,
+            receivedHttpClientResult = InvalidDataException(),
+            expectedResult = InvalidData(),
+            exactly = 1,
+            confirmVerified = client
+        )
+    }
+
+    @Test
+    fun testLoadDeliversBadRequestError() = runBlocking {
         every {
             client.get()
-        } returns flowOf(ConnectivityException())
+        } returns flowOf(BadRequestException())
 
         sut.load().test {
-            assertEquals(Connectivity::class.java, awaitItem()::class.java)
+            assertEquals(BadRequest::class.java, awaitItem()::class.java)
             awaitComplete()
         }
 
@@ -87,17 +115,41 @@ class LoadCryptoFeedRemoteUseCaseTest() {
     }
 
     @Test
-    fun testLoadDeliversInvalidDataError() = runBlocking {
+    fun testLoadDeliversServerError() = runBlocking {
         every {
             client.get()
-        } returns flowOf(InvalidDataException())
+        } returns flowOf(ServerErrorException())
 
         sut.load().test {
-            assertEquals(InvalidData::class.java, awaitItem()::class.java)
+            assertEquals(ServerError::class.java, awaitItem()::class.java)
             awaitComplete()
         }
 
-        verify (exactly = 1){ client.get() }
+        verify(exactly = 1) { client.get() }
         confirmVerified(client)
+    }
+
+    fun expect(
+        client: HttpClient,
+        sut: LoadCryptoFeedRemoteUseCase,
+        receivedHttpClientResult: Exception,
+        expectedResult: Any,
+        exactly: Int = -1,
+        confirmVerified: HttpClient
+    ) = runBlocking {
+        every {
+            client.get()
+        } returns flowOf(receivedHttpClientResult)
+
+        sut.load().test {
+            assertEquals(expectedResult, awaitItem()::class.java)
+            awaitComplete()
+        }
+
+        verify(exactly = exactly) {
+            client.get()
+        }
+
+        confirmVerified(confirmVerified)
     }
 }

@@ -9,13 +9,15 @@ interface HttpClient {
 
 class ConnectivityException : Exception()
 class InvalidDataException : Exception()
+class BadRequestException : Exception()
+class ServerErrorException : Exception()
 
 class LoadCryptoFeedRemoteUseCase constructor(
     private val client: HttpClient
 ) {
     fun load(): Flow<Exception> = flow {
         client.get().collect { error ->
-            when(error){
+            when (error) {
                 is ConnectivityException -> {
                     emit(Connectivity())
                 }
@@ -23,10 +25,21 @@ class LoadCryptoFeedRemoteUseCase constructor(
                 is InvalidDataException -> {
                     emit(InvalidData())
                 }
+
+                is BadRequestException -> {
+                    emit(BadRequest())
+                }
+
+                is ServerErrorException -> {
+                    emit(ServerError())
+                }
+
             }
         }
     }
 }
 
 class Connectivity : Exception()
-class InvalidData: Exception()
+class InvalidData : Exception()
+class BadRequest : Exception()
+class ServerError : Exception()
