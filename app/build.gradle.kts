@@ -60,6 +60,7 @@ dependencies {
     implementation(libs.ui.graphics)
     implementation(libs.ui.tooling.preview)
     implementation(libs.material3)
+    implementation(libs.retrofit)
     testImplementation(libs.junit)
     testImplementation(libs.mock.android)
     testImplementation(libs.mock.android.agent)

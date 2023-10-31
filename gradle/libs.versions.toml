@@ -11,6 +11,7 @@ compose-bom = "2023.10.01"
 
 mockkAndroid = "1.13.3"
 turbine = "1.0.0"
+retrofit = "2.9.0"
 
 # Asynchronous
 coroutines = "1.7.3"
@@ -41,6 +42,9 @@ mock-android-agent = { module = "io.mockk:mockk-agent", version.ref = "mockkAndr
 
 #Turbine
 turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
+
+#Http
+retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
 
 [plugins]
 com-android-application = { id = "com.android.application", version.ref = "agp" }
