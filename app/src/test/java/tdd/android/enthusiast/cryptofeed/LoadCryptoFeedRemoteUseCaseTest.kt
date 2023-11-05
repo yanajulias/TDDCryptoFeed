@@ -16,13 +16,15 @@ import tdd.android.enthusiast.cryptofeed.api.BadRequestException
 import tdd.android.enthusiast.cryptofeed.api.Connectivity
 import tdd.android.enthusiast.cryptofeed.api.ConnectivityException
 import tdd.android.enthusiast.cryptofeed.api.HttpClient
+import tdd.android.enthusiast.cryptofeed.api.HttpClientResult
 import tdd.android.enthusiast.cryptofeed.api.InternalServerError
 import tdd.android.enthusiast.cryptofeed.api.InternalServerErrorException
 import tdd.android.enthusiast.cryptofeed.api.InvalidData
 import tdd.android.enthusiast.cryptofeed.api.InvalidDataException
 import tdd.android.enthusiast.cryptofeed.api.LoadCryptoFeedRemoteUseCase
+import tdd.android.enthusiast.cryptofeed.api.LoadCryptoFeedResult
 
-class LoadCryptoFeedRemoteUseCaseTest() {
+class LoadCryptoFeedRemoteUseCaseTest {
     private val client = spyk<HttpClient>()
     lateinit var sut: LoadCryptoFeedRemoteUseCase
 
@@ -80,7 +82,7 @@ class LoadCryptoFeedRemoteUseCaseTest() {
         expect(
             client = client,
             sut = sut,
-            receivedHttpClientResult = ConnectivityException(),
+            receivedHttpClientResult = HttpClientResult.Failure(ConnectivityException()),
             expectedResult = Connectivity(),
             exactly = 1,
             confirmVerified = client
@@ -92,7 +94,7 @@ class LoadCryptoFeedRemoteUseCaseTest() {
         expect(
             client = client,
             sut = sut,
-            receivedHttpClientResult = InvalidDataException(),
+            receivedHttpClientResult = HttpClientResult.Failure(InvalidDataException()),
             expectedResult = InvalidData(),
             exactly = 1,
             confirmVerified = client
@@ -104,7 +106,7 @@ class LoadCryptoFeedRemoteUseCaseTest() {
         expect(
             client = client,
             sut = sut,
-            receivedHttpClientResult = BadRequestException(),
+            receivedHttpClientResult = HttpClientResult.Failure(BadRequestException()),
             expectedResult = BadRequest(),
             exactly = 1,
             confirmVerified = client
@@ -116,7 +118,7 @@ class LoadCryptoFeedRemoteUseCaseTest() {
         expect(
             client = client,
             sut = sut,
-            receivedHttpClientResult = InternalServerErrorException(),
+            receivedHttpClientResult = HttpClientResult.Failure(InternalServerErrorException()),
             expectedResult = InternalServerError(),
             exactly = 1,
             confirmVerified = client
@@ -126,7 +128,7 @@ class LoadCryptoFeedRemoteUseCaseTest() {
     private fun expect(
         client: HttpClient,
         sut: LoadCryptoFeedRemoteUseCase,
-        receivedHttpClientResult: Exception,
+        receivedHttpClientResult: HttpClientResult,
         expectedResult: Any,
         exactly: Int = -1,
         confirmVerified: HttpClient
@@ -136,7 +138,12 @@ class LoadCryptoFeedRemoteUseCaseTest() {
         } returns flowOf(receivedHttpClientResult)
 
         sut.load().test {
-            assertEquals(expectedResult::class.java, awaitItem()::class.java)
+            when(val receivedResult = awaitItem()){
+                is LoadCryptoFeedResult.Failure -> {
+                    assertEquals(expectedResult::class.java, receivedResult.exception::class.java)
+                }
+            }
+
             awaitComplete()
         }
 
