@@ -35,7 +35,7 @@ import tdd.android.enthusiast.cryptofeed.domain.Usd
 
 class LoadCryptoFeedRemoteUseCaseTest {
     private val client = spyk<HttpClient>()
-    lateinit var sut: LoadCryptoFeedRemoteUseCase
+    private lateinit var sut: LoadCryptoFeedRemoteUseCase
 
 
     @Before
@@ -89,48 +89,40 @@ class LoadCryptoFeedRemoteUseCaseTest {
     @Test
     fun testLoadDeliversConnectivityErrorOnClientError() {
         expect(
-            client = client,
             sut = sut,
             receivedHttpClientResult = HttpClientResult.Failure(ConnectivityException()),
             expectedResult = Connectivity(),
-            exactly = 1,
-            confirmVerified = client
+            exactly = 1
         )
     }
 
     @Test
     fun testLoadDeliversInvalidDataError() = runBlocking {
         expect(
-            client = client,
             sut = sut,
             receivedHttpClientResult = HttpClientResult.Failure(InvalidDataException()),
             expectedResult = InvalidData(),
-            exactly = 1,
-            confirmVerified = client
+            exactly = 1
         )
     }
 
     @Test
     fun testLoadDeliversBadRequestError() = runBlocking {
         expect(
-            client = client,
             sut = sut,
             receivedHttpClientResult = HttpClientResult.Failure(BadRequestException()),
             expectedResult = BadRequest(),
-            exactly = 1,
-            confirmVerified = client
+            exactly = 1
         )
     }
 
     @Test
     fun testLoadDeliversInternalServerError() = runBlocking {
         expect(
-            client = client,
             sut = sut,
             receivedHttpClientResult = HttpClientResult.Failure(InternalServerErrorException()),
             expectedResult = InternalServerError(),
-            exactly = 1,
-            confirmVerified = client
+            exactly = 1
         )
     }
 
@@ -197,24 +189,20 @@ class LoadCryptoFeedRemoteUseCaseTest {
             )
         )
         expect(
-            client = client,
             sut = sut,
             receivedHttpClientResult = HttpClientResult.Success(root = RemoteRootCryptoFeed(
                 cryptoFeedItemsResponse
             ) ),
             expectedResult = LoadCryptoFeedResult.Success(cryptoFeedItems),
-            exactly = 1,
-            confirmVerified = client
+            exactly = 1
         )
     }
 
     private fun expect(
-        client: HttpClient,
         sut: LoadCryptoFeedRemoteUseCase,
         receivedHttpClientResult: HttpClientResult,
         expectedResult: Any,
-        exactly: Int = -1,
-        confirmVerified: HttpClient
+        exactly: Int = -1
     ) = runBlocking {
         every {
             client.get()
@@ -244,6 +232,6 @@ class LoadCryptoFeedRemoteUseCaseTest {
             client.get()
         }
 
-        confirmVerified(confirmVerified)
+        confirmVerified(client)
     }
 }
