@@ -7,15 +7,6 @@ import tdd.android.enthusiast.cryptofeed.domain.CryptoFeed
 import tdd.android.enthusiast.cryptofeed.domain.Raw
 import tdd.android.enthusiast.cryptofeed.domain.Usd
 
-sealed class HttpClientResult {
-    data class Failure(val exception: Exception) : HttpClientResult()
-    data class Success(val root: RemoteRootCryptoFeed) : HttpClientResult()
-}
-
-interface HttpClient {
-    fun get(): Flow<HttpClientResult>
-}
-
 // Infrastructure Error (data)
 class ConnectivityException : Exception()
 class InvalidDataException : Exception()
