@@ -22,7 +22,6 @@ import tdd.android.enthusiast.cryptofeed.api.InternalServerErrorException
 import tdd.android.enthusiast.cryptofeed.api.InvalidData
 import tdd.android.enthusiast.cryptofeed.api.InvalidDataException
 import tdd.android.enthusiast.cryptofeed.api.LoadCryptoFeedRemoteUseCase
-import tdd.android.enthusiast.cryptofeed.api.LoadCryptoFeedResult
 import tdd.android.enthusiast.cryptofeed.api.RemoteCoinInfo
 import tdd.android.enthusiast.cryptofeed.api.RemoteCryptoFeedItem
 import tdd.android.enthusiast.cryptofeed.api.RemoteDisplay
@@ -30,6 +29,7 @@ import tdd.android.enthusiast.cryptofeed.api.RemoteRootCryptoFeed
 import tdd.android.enthusiast.cryptofeed.api.RemoteUsd
 import tdd.android.enthusiast.cryptofeed.domain.CoinInfo
 import tdd.android.enthusiast.cryptofeed.domain.CryptoFeed
+import tdd.android.enthusiast.cryptofeed.domain.LoadCryptoFeedResult
 import tdd.android.enthusiast.cryptofeed.domain.Raw
 import tdd.android.enthusiast.cryptofeed.domain.Usd
 
