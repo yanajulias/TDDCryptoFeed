@@ -3,6 +3,7 @@ package tdd.android.enthusiast.cryptofeed
 import app.cash.turbine.test
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.confirmVerified
 import io.mockk.mockk
 import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.runBlocking
@@ -106,6 +107,12 @@ class CryptoFeedRetrofitHttpClientTest {
                     service.get()
                 } throws IOException()
             }
+
+            else -> {
+                coEvery {
+                    service.get()
+                } throws Exception()
+            }
         }
 
         sut.get().test {
@@ -117,5 +124,7 @@ class CryptoFeedRetrofitHttpClientTest {
         coVerify(exactly = 1) {
             service.get()
         }
+
+        confirmVerified(service)
     }
 }
