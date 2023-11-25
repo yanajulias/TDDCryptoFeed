@@ -5,29 +5,16 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import junit.framework.TestCase.assertEquals
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Test
 import tdd.android.enthusiast.cryptofeed.api.ConnectivityException
+import tdd.android.enthusiast.cryptofeed.api.CryptoFeedRetrofitHttpClient
 import tdd.android.enthusiast.cryptofeed.api.HttpClientResult
 import java.io.IOException
 
 interface CryptoFeedService {
     suspend fun get()
-}
-
-class CryptoFeedRetrofitHttpClient(
-    private val service: CryptoFeedService
-) {
-    fun get(): Flow<HttpClientResult> = flow{
-        try {
-            service.get()
-        } catch (exception: Exception){
-            emit(HttpClientResult.Failure(ConnectivityException()))
-        }
-    }
 }
 
 class CryptoFeedRetrofitHttpClientTest {
