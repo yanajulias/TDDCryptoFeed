@@ -22,11 +22,15 @@ import tdd.android.enthusiast.cryptofeed.api.InternalServerErrorException
 import tdd.android.enthusiast.cryptofeed.api.InvalidData
 import tdd.android.enthusiast.cryptofeed.api.InvalidDataException
 import tdd.android.enthusiast.cryptofeed.api.LoadCryptoFeedRemoteUseCase
+import tdd.android.enthusiast.cryptofeed.api.NotFound
+import tdd.android.enthusiast.cryptofeed.api.NotFoundException
 import tdd.android.enthusiast.cryptofeed.api.RemoteCoinInfo
 import tdd.android.enthusiast.cryptofeed.api.RemoteCryptoFeedItem
 import tdd.android.enthusiast.cryptofeed.api.RemoteDisplay
 import tdd.android.enthusiast.cryptofeed.api.RemoteRootCryptoFeed
 import tdd.android.enthusiast.cryptofeed.api.RemoteUsd
+import tdd.android.enthusiast.cryptofeed.api.Unexpected
+import tdd.android.enthusiast.cryptofeed.api.UnexpectedException
 import tdd.android.enthusiast.cryptofeed.domain.CoinInfo
 import tdd.android.enthusiast.cryptofeed.domain.CryptoFeed
 import tdd.android.enthusiast.cryptofeed.domain.LoadCryptoFeedResult
@@ -49,6 +53,8 @@ class LoadCryptoFeedRemoteUseCaseTest {
         verify(exactly = 0) { // untuk verifikasi kalo client.get kepanggil atau eng
             client.get()
         }
+
+        confirmVerified(client)
     }
 
     @Test
@@ -97,7 +103,7 @@ class LoadCryptoFeedRemoteUseCaseTest {
     }
 
     @Test
-    fun testLoadDeliversInvalidDataError() = runBlocking {
+    fun testLoadDeliversInvalidDataError()  {
         expect(
             sut = sut,
             receivedHttpClientResult = HttpClientResult.Failure(InvalidDataException()),
@@ -107,7 +113,7 @@ class LoadCryptoFeedRemoteUseCaseTest {
     }
 
     @Test
-    fun testLoadDeliversBadRequestError() = runBlocking {
+    fun testLoadDeliversBadRequestError() {
         expect(
             sut = sut,
             receivedHttpClientResult = HttpClientResult.Failure(BadRequestException()),
@@ -117,11 +123,31 @@ class LoadCryptoFeedRemoteUseCaseTest {
     }
 
     @Test
-    fun testLoadDeliversInternalServerError() = runBlocking {
+    fun  testLoadDeliversNotFoundErrorOnClientError() {
+        expect(
+            sut = sut,
+            receivedHttpClientResult = HttpClientResult.Failure(NotFoundException()),
+            expectedResult = NotFound(),
+            exactly = 1
+        )
+    }
+
+    @Test
+    fun testLoadDeliversInternalServerError() {
         expect(
             sut = sut,
             receivedHttpClientResult = HttpClientResult.Failure(InternalServerErrorException()),
             expectedResult = InternalServerError(),
+            exactly = 1
+        )
+    }
+
+    @Test
+    fun testLoadDeliversUnexpectedError() {
+        expect(
+            sut = sut,
+            receivedHttpClientResult = HttpClientResult.Failure(UnexpectedException()),
+            expectedResult = Unexpected(),
             exactly = 1
         )
     }
@@ -188,6 +214,22 @@ class LoadCryptoFeedRemoteUseCaseTest {
                 )
             )
         )
+        expect(
+            sut = sut,
+            receivedHttpClientResult = HttpClientResult.Success(root = RemoteRootCryptoFeed(
+                cryptoFeedItemsResponse
+            ) ),
+            expectedResult = LoadCryptoFeedResult.Success(cryptoFeedItems),
+            exactly = 1
+        )
+    }
+
+    @Test
+    fun testLoadDeliversNotItemsOn200HttpResponseWithEmptyResponse() {
+        val cryptoFeedItemsResponse = emptyList<RemoteCryptoFeedItem>()
+
+        val cryptoFeedItems = emptyList<CryptoFeed>()
+
         expect(
             sut = sut,
             receivedHttpClientResult = HttpClientResult.Success(root = RemoteRootCryptoFeed(

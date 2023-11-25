@@ -13,6 +13,8 @@ class ConnectivityException : Exception()
 class InvalidDataException : Exception()
 class BadRequestException : Exception()
 class InternalServerErrorException : Exception()
+class NotFoundException: Exception()
+class UnexpectedException: Exception()
 
 class LoadCryptoFeedRemoteUseCase constructor(
     private val client: HttpClient
@@ -45,6 +47,15 @@ class LoadCryptoFeedRemoteUseCase constructor(
                         is InternalServerErrorException -> {
                             emit(LoadCryptoFeedResult.Failure(InternalServerError()))
                         }
+
+                        is NotFoundException -> {
+                            emit(LoadCryptoFeedResult.Failure(NotFound()))
+                        }
+
+                        is UnexpectedException -> {
+                            emit(LoadCryptoFeedResult.Failure(Unexpected()))
+                        }
+
                     }
                 }
 
@@ -77,3 +88,5 @@ class Connectivity : Exception()
 class InvalidData : Exception()
 class BadRequest : Exception()
 class InternalServerError : Exception()
+class NotFound: Exception()
+class Unexpected : Exception()
