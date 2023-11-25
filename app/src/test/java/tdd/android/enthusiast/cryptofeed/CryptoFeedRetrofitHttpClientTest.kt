@@ -6,12 +6,17 @@ import io.mockk.coVerify
 import io.mockk.mockk
 import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.runBlocking
+import okhttp3.ResponseBody
 import org.junit.Before
 import org.junit.Test
+import retrofit2.HttpException
+import retrofit2.Response
+import tdd.android.enthusiast.cryptofeed.api.BadRequestException
 import tdd.android.enthusiast.cryptofeed.api.ConnectivityException
 import tdd.android.enthusiast.cryptofeed.api.CryptoFeedRetrofitHttpClient
 import tdd.android.enthusiast.cryptofeed.api.CryptoFeedService
 import tdd.android.enthusiast.cryptofeed.api.HttpClientResult
+import tdd.android.enthusiast.cryptofeed.api.RemoteRootCryptoFeed
 import java.io.IOException
 
 class CryptoFeedRetrofitHttpClientTest {
@@ -32,6 +37,25 @@ class CryptoFeedRetrofitHttpClientTest {
         sut.get().test {
             val receivedValue = awaitItem() as HttpClientResult.Failure
             assertEquals(ConnectivityException()::class.java, receivedValue.exception::class.java)
+            awaitComplete()
+        }
+
+        coVerify(exactly = 1) {
+            service.get()
+        }
+    }
+
+    @Test
+    fun testGetFailsOn400HttpResponse() = runBlocking {
+        val response = Response.error<RemoteRootCryptoFeed>(400, ResponseBody.create(null, ""))
+
+        coEvery { // karena pake suspend function
+            service.get()
+        } throws HttpException(response)
+
+        sut.get().test {
+            val receivedValue = awaitItem() as HttpClientResult.Failure
+            assertEquals(BadRequestException()::class.java, receivedValue.exception::class.java)
             awaitComplete()
         }
 
