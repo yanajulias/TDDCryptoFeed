@@ -10,12 +10,9 @@ import org.junit.Before
 import org.junit.Test
 import tdd.android.enthusiast.cryptofeed.api.ConnectivityException
 import tdd.android.enthusiast.cryptofeed.api.CryptoFeedRetrofitHttpClient
+import tdd.android.enthusiast.cryptofeed.api.CryptoFeedService
 import tdd.android.enthusiast.cryptofeed.api.HttpClientResult
 import java.io.IOException
-
-interface CryptoFeedService {
-    suspend fun get()
-}
 
 class CryptoFeedRetrofitHttpClientTest {
     private val service = mockk<CryptoFeedService>()
