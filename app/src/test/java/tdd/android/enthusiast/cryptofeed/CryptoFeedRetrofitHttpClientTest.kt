@@ -17,6 +17,7 @@ import tdd.android.enthusiast.cryptofeed.api.CryptoFeedRetrofitHttpClient
 import tdd.android.enthusiast.cryptofeed.api.CryptoFeedService
 import tdd.android.enthusiast.cryptofeed.api.HttpClientResult
 import tdd.android.enthusiast.cryptofeed.api.InternalServerErrorException
+import tdd.android.enthusiast.cryptofeed.api.InvalidDataException
 import tdd.android.enthusiast.cryptofeed.api.NotFoundException
 import tdd.android.enthusiast.cryptofeed.api.RemoteRootCryptoFeed
 import java.io.IOException
@@ -62,6 +63,15 @@ class CryptoFeedRetrofitHttpClientTest {
             withStatusCode = 500,
             sut = sut,
             expectedResult = InternalServerErrorException()
+        )
+    }
+
+    @Test
+    fun testGetFailsOn422HttpResponse() {
+        expect(
+            withStatusCode = 422,
+            sut = sut,
+            expectedResult = InvalidDataException()
         )
     }
 
