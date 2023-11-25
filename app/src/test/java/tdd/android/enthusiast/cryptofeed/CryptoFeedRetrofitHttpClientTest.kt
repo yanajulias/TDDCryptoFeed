@@ -35,7 +35,7 @@ class CryptoFeedRetrofitHttpClientTest {
             awaitComplete()
         }
 
-        coVerify {
+        coVerify(exactly = 1) {
             service.get()
         }
     }
