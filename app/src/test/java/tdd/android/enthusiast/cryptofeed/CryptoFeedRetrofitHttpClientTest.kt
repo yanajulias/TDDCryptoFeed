@@ -20,11 +20,7 @@ import tdd.android.enthusiast.cryptofeed.api.HttpClientResult
 import tdd.android.enthusiast.cryptofeed.api.InternalServerErrorException
 import tdd.android.enthusiast.cryptofeed.api.InvalidDataException
 import tdd.android.enthusiast.cryptofeed.api.NotFoundException
-import tdd.android.enthusiast.cryptofeed.api.RemoteCoinInfo
-import tdd.android.enthusiast.cryptofeed.api.RemoteCryptoFeedItem
-import tdd.android.enthusiast.cryptofeed.api.RemoteDisplay
 import tdd.android.enthusiast.cryptofeed.api.RemoteRootCryptoFeed
-import tdd.android.enthusiast.cryptofeed.api.RemoteUsd
 import tdd.android.enthusiast.cryptofeed.api.UnexpectedException
 import java.io.IOException
 
@@ -91,37 +87,6 @@ class CryptoFeedRetrofitHttpClientTest {
 
     @Test
     fun testGetSuccessOn200HttpResponseWithResponse() {
-        val cryptoFeedResponse = listOf(
-            RemoteCryptoFeedItem(
-                RemoteCoinInfo(
-                    "1",
-                    "BTC",
-                    "Bitcoin",
-                    "imageUrl"
-                ),
-                RemoteDisplay(
-                    RemoteUsd(
-                        1.0,
-                        1F
-                    )
-                )
-            ),
-            RemoteCryptoFeedItem(
-                RemoteCoinInfo(
-                    "2",
-                    "BTC 2",
-                    "Bitcoin 2",
-                    "imageUrl"
-                ),
-                RemoteDisplay(
-                    RemoteUsd(
-                        2.0,
-                        2F
-                    )
-                )
-            )
-        )
-
         expect(
             sut = sut,
             receivedResult = RemoteRootCryptoFeed(cryptoFeedResponse),

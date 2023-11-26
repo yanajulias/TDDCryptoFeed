@@ -24,11 +24,8 @@ import tdd.android.enthusiast.cryptofeed.api.InvalidDataException
 import tdd.android.enthusiast.cryptofeed.api.LoadCryptoFeedRemoteUseCase
 import tdd.android.enthusiast.cryptofeed.api.NotFound
 import tdd.android.enthusiast.cryptofeed.api.NotFoundException
-import tdd.android.enthusiast.cryptofeed.api.RemoteCoinInfo
 import tdd.android.enthusiast.cryptofeed.api.RemoteCryptoFeedItem
-import tdd.android.enthusiast.cryptofeed.api.RemoteDisplay
 import tdd.android.enthusiast.cryptofeed.api.RemoteRootCryptoFeed
-import tdd.android.enthusiast.cryptofeed.api.RemoteUsd
 import tdd.android.enthusiast.cryptofeed.api.Unexpected
 import tdd.android.enthusiast.cryptofeed.api.UnexpectedException
 import tdd.android.enthusiast.cryptofeed.domain.CoinInfo
@@ -153,37 +150,7 @@ class LoadCryptoFeedRemoteUseCaseTest {
     }
 
     @Test
-    fun testLoadDeliversItemsOn200HttpResponseWithCryptoFeed() {
-        val cryptoFeedItemsResponse = listOf(
-            RemoteCryptoFeedItem(
-                RemoteCoinInfo(
-                    "1",
-                    "BTC",
-                    "Bitcoin",
-                    "imageUrl"
-                ),
-                RemoteDisplay(
-                    RemoteUsd(
-                        1.0,
-                        1F
-                    )
-                )
-            ),
-            RemoteCryptoFeedItem(
-                RemoteCoinInfo(
-                    "2",
-                    "BTC 2",
-                    "Bitcoin 2",
-                    "imageUrl"
-                ),
-                RemoteDisplay(
-                    RemoteUsd(
-                        2.0,
-                        2F
-                    )
-                )
-            )
-        )
+    fun testLoadDeliversItemsOn200HttpResponseWithResponse() {
         val cryptoFeedItems = listOf(
             CryptoFeed(
                 CoinInfo(
@@ -217,7 +184,7 @@ class LoadCryptoFeedRemoteUseCaseTest {
         expect(
             sut = sut,
             receivedHttpClientResult = HttpClientResult.Success(root = RemoteRootCryptoFeed(
-                cryptoFeedItemsResponse
+                cryptoFeedResponse
             ) ),
             expectedResult = LoadCryptoFeedResult.Success(cryptoFeedItems),
             exactly = 1
