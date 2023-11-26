@@ -1,6 +1,7 @@
 package tdd.android.enthusiast.cryptofeed
 
 import app.cash.turbine.test
+import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.confirmVerified
@@ -8,6 +9,7 @@ import io.mockk.mockk
 import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.runBlocking
 import okhttp3.ResponseBody
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import retrofit2.HttpException
@@ -96,6 +98,11 @@ class CryptoFeedRetrofitHttpClientTest {
                 )
             )
         )
+    }
+
+    @After
+    fun tearDown(){
+        clearAllMocks()
     }
 
     private fun expect(
