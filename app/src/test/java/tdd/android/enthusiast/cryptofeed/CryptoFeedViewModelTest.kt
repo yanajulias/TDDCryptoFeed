@@ -6,12 +6,15 @@ import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.spyk
 import io.mockk.verify
+import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertFalse
 import junit.framework.TestCase.assertTrue
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.take
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Test
@@ -29,6 +32,9 @@ class CryptoFeedViewModel(private val useCase: LoadCryptoFeedUseCase) {
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
 
     fun load() {
+        _uiState.update {
+            it.copy(isLoading = true)
+        }
         useCase.load()
     }
 }
@@ -89,5 +95,20 @@ class CryptoFeedViewModelTest {
         }
 
         confirmVerified(useCase)
+    }
+
+    @Test
+    fun testLoadIsLoadingState() = runBlocking {
+        every {
+            useCase.load()
+        } returns flowOf()
+
+        sut.load()
+
+        sut.uiState.take(1).test {
+            val receivedResult = awaitItem()
+            assertEquals(true, receivedResult.isLoading)
+            awaitComplete()
+        }
     }
 }
