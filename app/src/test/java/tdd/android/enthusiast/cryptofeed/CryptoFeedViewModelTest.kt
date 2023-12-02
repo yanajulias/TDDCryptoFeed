@@ -74,4 +74,20 @@ class CryptoFeedViewModelTest {
 
         confirmVerified(useCase)
     }
+
+    @Test
+    fun testLoadTwiceRequestsData() = runBlocking {
+        every {
+            useCase.load()
+        } returns flowOf()
+
+        sut.load()
+        sut.load()
+
+        verify(exactly = 2) {
+            useCase.load()
+        }
+
+        confirmVerified(useCase)
+    }
 }
