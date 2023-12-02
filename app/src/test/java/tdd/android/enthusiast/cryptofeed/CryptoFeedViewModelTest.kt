@@ -28,6 +28,7 @@ import org.junit.Test
 import tdd.android.enthusiast.cryptofeed.api.BadRequest
 import tdd.android.enthusiast.cryptofeed.api.Connectivity
 import tdd.android.enthusiast.cryptofeed.api.InvalidData
+import tdd.android.enthusiast.cryptofeed.api.NotFound
 import tdd.android.enthusiast.cryptofeed.domain.CryptoFeed
 import tdd.android.enthusiast.cryptofeed.domain.LoadCryptoFeedResult
 import tdd.android.enthusiast.cryptofeed.domain.LoadCryptoFeedUseCase
@@ -65,6 +66,10 @@ class CryptoFeedViewModel(private val useCase: LoadCryptoFeedUseCase) : ViewMode
 
                                     is BadRequest -> {
                                         "Permintaan gagal, coba lagi"
+                                    }
+
+                                    is NotFound -> {
+                                        "Tidak ditemukan, coba lagi"
                                     }
 
                                     else -> {
@@ -189,6 +194,16 @@ class CryptoFeedViewModelTest {
             sut = sut,
             expectedLoadingResult = false,
             expectedFailedResult = "Permintaan gagal, coba lagi"
+        )
+    }
+
+    @Test
+    fun testNotFoundShowsNotFoundError() = runBlocking {
+        expect(
+            result = LoadCryptoFeedResult.Failure(NotFound()),
+            sut = sut,
+            expectedLoadingResult = false,
+            expectedFailedResult = "Tidak ditemukan, coba lagi"
         )
     }
 
