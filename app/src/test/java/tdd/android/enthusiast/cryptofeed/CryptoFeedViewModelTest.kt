@@ -57,6 +57,10 @@ class CryptoFeedViewModel(private val useCase: LoadCryptoFeedUseCase) : ViewMode
                                         "Tidak ada internet"
                                     }
 
+                                    is InvalidData -> {
+                                        "Terjadi kesalahan"
+                                    }
+
                                     else -> {
                                         ""
                                     }
@@ -163,6 +167,27 @@ class CryptoFeedViewModelTest {
         sut.uiState.take(1).test {
             val receivedResult = awaitItem()
             assertEquals("Tidak ada internet", receivedResult.failed)
+            awaitComplete()
+        }
+
+        verify(exactly = 1) {
+            useCase.load()
+        }
+
+        confirmVerified(useCase)
+    }
+
+    @Test
+    fun testLoadFailedInvalidDataErrorShowsError() = runBlocking {
+        every {
+            useCase.load()
+        } returns flowOf(LoadCryptoFeedResult.Failure(InvalidData()))
+
+        sut.load()
+
+        sut.uiState.take(1).test {
+            val receivedResult = awaitItem()
+            assertEquals("Terjadi kesalahan", receivedResult.failed)
             awaitComplete()
         }
 
