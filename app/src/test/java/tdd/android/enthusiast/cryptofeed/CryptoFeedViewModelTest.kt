@@ -1,5 +1,7 @@
 package tdd.android.enthusiast.cryptofeed
 
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import app.cash.turbine.test
 import io.mockk.MockKAnnotations
 import io.mockk.confirmVerified
@@ -9,16 +11,24 @@ import io.mockk.verify
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertFalse
 import junit.framework.TestCase.assertTrue
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.setMain
 import org.junit.Before
 import org.junit.Test
+import tdd.android.enthusiast.cryptofeed.api.Connectivity
+import tdd.android.enthusiast.cryptofeed.api.InvalidData
 import tdd.android.enthusiast.cryptofeed.domain.CryptoFeed
+import tdd.android.enthusiast.cryptofeed.domain.LoadCryptoFeedResult
 import tdd.android.enthusiast.cryptofeed.domain.LoadCryptoFeedUseCase
 
 data class UiState(
@@ -27,15 +37,36 @@ data class UiState(
     val failed: String = ""
 )
 
-class CryptoFeedViewModel(private val useCase: LoadCryptoFeedUseCase) {
+class CryptoFeedViewModel(private val useCase: LoadCryptoFeedUseCase) : ViewModel() {
     private val _uiState = MutableStateFlow(UiState())
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
 
     fun load() {
-        _uiState.update {
-            it.copy(isLoading = true)
+        viewModelScope.launch {
+            _uiState.update {
+                it.copy(isLoading = true)
+            }
+            useCase.load().collect { result ->
+                _uiState.update {
+                    when (result) {
+                        is LoadCryptoFeedResult.Success -> TODO()
+                        is LoadCryptoFeedResult.Failure -> {
+                            it.copy(
+                                failed = when (result.exception) {
+                                    is Connectivity -> {
+                                        "Tidak ada internet"
+                                    }
+
+                                    else -> {
+                                        ""
+                                    }
+                                }
+                            )
+                        }
+                    }
+                }
+            }
         }
-        useCase.load()
     }
 }
 
@@ -43,10 +74,13 @@ class CryptoFeedViewModelTest {
     private val useCase = spyk<LoadCryptoFeedUseCase>()
     private lateinit var sut: CryptoFeedViewModel
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     @Before
     fun setUp() {
         MockKAnnotations.init(this, relaxed = true)
         sut = CryptoFeedViewModel(useCase = useCase)
+
+        Dispatchers.setMain(UnconfinedTestDispatcher())
     }
 
     @Test
@@ -110,5 +144,32 @@ class CryptoFeedViewModelTest {
             assertEquals(true, receivedResult.isLoading)
             awaitComplete()
         }
+
+        verify(exactly = 1) {
+            useCase.load()
+        }
+
+        confirmVerified(useCase)
+    }
+
+    @Test
+    fun testLoadFailedConnectivityShowsConnectivityError() = runBlocking {
+        every {
+            useCase.load()
+        } returns flowOf(LoadCryptoFeedResult.Failure(Connectivity()))
+
+        sut.load()
+
+        sut.uiState.take(1).test {
+            val receivedResult = awaitItem()
+            assertEquals("Tidak ada internet", receivedResult.failed)
+            awaitComplete()
+        }
+
+        verify(exactly = 1) {
+            useCase.load()
+        }
+
+        confirmVerified(useCase)
     }
 }
