@@ -1,8 +1,9 @@
 package tdd.android.enthusiast.cryptofeed
 
+import app.cash.turbine.test
 import io.mockk.MockKAnnotations
-import io.mockk.coEvery
 import io.mockk.confirmVerified
+import io.mockk.every
 import io.mockk.spyk
 import io.mockk.verify
 import junit.framework.TestCase.assertFalse
@@ -11,6 +12,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Test
 import tdd.android.enthusiast.cryptofeed.domain.CryptoFeed
@@ -26,7 +28,9 @@ class CryptoFeedViewModel(private val useCase: LoadCryptoFeedUseCase) {
     private val _uiState = MutableStateFlow(UiState())
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
 
-    fun load(){}
+    fun load() {
+        useCase.load()
+    }
 }
 
 class CryptoFeedViewModelTest {
@@ -51,6 +55,20 @@ class CryptoFeedViewModelTest {
     @Test
     fun testInitDoesNotLoad() {
         verify(exactly = 0) {
+            useCase.load()
+        }
+
+        confirmVerified(useCase)
+    }
+
+    @Test
+    fun testLoadRequestsData() = runBlocking {
+        every {
+            useCase.load()
+        } returns flowOf()
+
+        sut.load()
+        verify(exactly = 1) {
             useCase.load()
         }
 
