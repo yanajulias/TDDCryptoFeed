@@ -27,6 +27,7 @@ import org.junit.Before
 import org.junit.Test
 import tdd.android.enthusiast.cryptofeed.api.BadRequest
 import tdd.android.enthusiast.cryptofeed.api.Connectivity
+import tdd.android.enthusiast.cryptofeed.api.InternalServerError
 import tdd.android.enthusiast.cryptofeed.api.InvalidData
 import tdd.android.enthusiast.cryptofeed.api.NotFound
 import tdd.android.enthusiast.cryptofeed.domain.CryptoFeed
@@ -72,6 +73,9 @@ class CryptoFeedViewModel(private val useCase: LoadCryptoFeedUseCase) : ViewMode
                                         "Tidak ditemukan, coba lagi"
                                     }
 
+                                    is InternalServerError -> {
+                                        "Server sedang dalam perbaikan"
+                                    }
                                     else -> {
                                         ""
                                     }
@@ -204,6 +208,16 @@ class CryptoFeedViewModelTest {
             sut = sut,
             expectedLoadingResult = false,
             expectedFailedResult = "Tidak ditemukan, coba lagi"
+        )
+    }
+
+    @Test
+    fun testInternalServerErrorShowsInternalServerError() = runBlocking {
+        expect(
+            result = LoadCryptoFeedResult.Failure(InternalServerError()),
+            sut = sut,
+            expectedLoadingResult = false,
+            expectedFailedResult = "Server sedang dalam perbaikan"
         )
     }
 
