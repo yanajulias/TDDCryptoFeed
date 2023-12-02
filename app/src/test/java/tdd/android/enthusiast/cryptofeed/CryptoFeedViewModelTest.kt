@@ -25,6 +25,7 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.setMain
 import org.junit.Before
 import org.junit.Test
+import tdd.android.enthusiast.cryptofeed.api.BadRequest
 import tdd.android.enthusiast.cryptofeed.api.Connectivity
 import tdd.android.enthusiast.cryptofeed.api.InvalidData
 import tdd.android.enthusiast.cryptofeed.domain.CryptoFeed
@@ -60,6 +61,10 @@ class CryptoFeedViewModel(private val useCase: LoadCryptoFeedUseCase) : ViewMode
 
                                     is InvalidData -> {
                                         "Terjadi kesalahan"
+                                    }
+
+                                    is BadRequest -> {
+                                        "Permintaan gagal, coba lagi"
                                     }
 
                                     else -> {
@@ -174,6 +179,16 @@ class CryptoFeedViewModelTest {
             sut = sut,
             expectedLoadingResult = false,
             expectedFailedResult = "Terjadi kesalahan"
+        )
+    }
+
+    @Test
+    fun testLoadBadRequestShowsBadRequestError() = runBlocking {
+        expect(
+            result = LoadCryptoFeedResult.Failure(BadRequest()),
+            sut = sut,
+            expectedLoadingResult = false,
+            expectedFailedResult = "Permintaan gagal, coba lagi"
         )
     }
 
